@@ -19,6 +19,7 @@ class CreateVisitsTable extends Migration {
 			$table->string('ip', 15);
 			$table->string('url');
 			$table->string('date', 8);
+			$table->int('count');
 		});
 	}
 

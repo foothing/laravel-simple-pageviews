@@ -9,8 +9,18 @@ class VisitRepository extends EloquentRepository {
         parent::__construct($visit);
     }
 
-    public function create($visit) {
+    public function update($visit) {
+        $unique = [
+            'session' => $visit->session,
+            'ip' => $visit->ip,
+            'url' => $visit->url,
+            'date' => $visit->date
+        ];
 
+        $values = [
+            'views' => 'views+1'
+        ];
+
+        return $this->model->updateOrCreate($unique, $values);
     }
-
 }

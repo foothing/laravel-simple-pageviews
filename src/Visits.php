@@ -22,7 +22,7 @@ class Visits {
         $visit->url = $request->getPath();
         $visit->date = date('YmdH');
 
-        $this->visits->create($visit);
+        $this->visits->update($visit);
     }
 
 }
