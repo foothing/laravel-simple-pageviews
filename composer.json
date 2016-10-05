@@ -1,0 +1,11 @@
+{
+    "name": "foothing/laravel-simple-pageviews",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "brazorf",
+            "email": "fabrizio.ranieri@gmail.com"
+        }
+    ],
+    "require": {}
+}
