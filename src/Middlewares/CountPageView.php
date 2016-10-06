@@ -27,15 +27,18 @@ class CountPageView {
     }
 
     protected function whitelisted(Request $request) {
-
-        // @TODO config whitelist
-
-        if (preg_match('/^(api|assets|src|admin|account\/permissions|drupal|mob).*/', $request->path())) {
-            //\Log::debug("Blacklist: " . $request->path());
-            return false;
+        if (! $blacklist = config('visits.blacklist')) {
+            return true;
         }
-        //\Log::debug("Whitelisted: " . $request->path());
+
+        // @TODO cache
+        foreach ($blacklist as $rule) {
+            if (preg_match($rule, $request->path())) {
+                //\Log::debug("Blacklist: " . $request->path());
+                return false;
+            }
+        }
+        //\Log::debug("Whitelist: " . $request->path());
         return true;
     }
-
 }
