@@ -30,7 +30,7 @@ class CountPageView {
 
         // @TODO config whitelist
 
-        if (preg_match('/^(api|assets|src|admin|account\/permissions|drupal).*/', $request->path())) {
+        if (preg_match('/^(api|assets|src|admin|account\/permissions|drupal|mob).*/', $request->path())) {
             //\Log::debug("Blacklist: " . $request->path());
             return false;
         }

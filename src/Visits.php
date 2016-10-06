@@ -27,7 +27,8 @@ class Visits {
 
     public function getVisits($when = null) {
         if (! $when) {
-            return $this->visits->all();
+            //return $this->visits->all();
+            return $this->visits->aggregate();
         } else {
             // return period
         }
@@ -41,7 +42,7 @@ class Visits {
         return $this->visits->countUniqueVisits();
     }
 
-    public function getVisitsByUrl($url) {
-
+    public function getVisitsSerie() {
+        return $this->visits->getVisitsSerie();
     }
 }
