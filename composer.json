@@ -1,0 +1,20 @@
+{
+    "name": "foothing/laravel-simple-pageviews",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "brazorf",
+            "email": "fabrizio.ranieri@gmail.com"
+        }
+    ],
+    "require": {
+		"illuminate/database": "5.1.*",
+		"illuminate/http": "5.1.*",
+		"foothing/laravel-repository": "^0.8.1"
+	},
+	"autoload": {
+		"psr-4": {
+			"Foothing\\Laravel\\Visits\\": "src"
+		}
+	}
+}
