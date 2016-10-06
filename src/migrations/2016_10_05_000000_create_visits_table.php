@@ -18,8 +18,11 @@ class CreateVisitsTable extends Migration {
 			$table->string('session');
 			$table->string('ip', 15);
 			$table->string('url');
-			$table->string('date', 8);
-			$table->int('count');
+			$table->string('date', 10);
+			$table->integer('count')->unsigned();
+
+            // @TODO referer
+
 		});
 	}
 

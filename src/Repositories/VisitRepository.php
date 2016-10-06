@@ -18,9 +18,19 @@ class VisitRepository extends EloquentRepository {
         ];
 
         $values = [
-            'views' => 'views+1'
+            'count' => \DB::raw('count+1')
         ];
 
         return $this->model->updateOrCreate($unique, $values);
+    }
+
+    // @TODO date filters
+
+    public function countVisits() {
+        return $this->model->where('date', 'like', date('Ymd') . "%")->groupBy('date')->sum('count');
+    }
+
+    public function countUniqueVisits() {
+        return $this->model->where('date', 'like', date('Ymd') . "%")->groupBy('date')->count();
     }
 }
