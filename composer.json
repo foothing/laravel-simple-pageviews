@@ -1,6 +1,7 @@
 {
     "name": "foothing/laravel-simple-pageviews",
     "license": "MIT",
+	"keywords": ["tracking", "page views", "page hits", "laravel"],
     "authors": [
         {
             "name": "brazorf",

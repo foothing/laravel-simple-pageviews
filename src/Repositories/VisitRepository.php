@@ -24,13 +24,41 @@ class VisitRepository extends EloquentRepository {
         return $this->model->updateOrCreate($unique, $values);
     }
 
-    // @TODO date filters
+    // @TODO date filters, the method belows needs filtering
+    // and they are only placeholders yet.
+
+    public function aggregate() {
+        return $this->model
+            ->select('*', \DB::raw('SUBSTRING(date, 1, 8) as day'), \DB::raw('sum(count) as hits'))
+            ->where('date', 'like', date('Ymd') . "%")
+            ->groupBy('url', 'day')
+            ->orderBy('hits', 'desc')
+            ->limit(50)
+            ->get();
+    }
 
     public function countVisits() {
-        return $this->model->where('date', 'like', date('Ymd') . "%")->groupBy('date')->sum('count');
+        return $this->model
+            ->select('*', \DB::raw('SUBSTRING(date, 1, 8) as day'), \DB::raw('sum(count) as hits'))
+            ->where('date', 'like', date('Ymd') . "%")
+            ->groupBy('day')
+            ->first()
+            ->hits;
     }
 
     public function countUniqueVisits() {
-        return $this->model->where('date', 'like', date('Ymd') . "%")->groupBy('date')->count();
+        return $this->model
+            ->select(\DB::raw('SUBSTRING(date, 1, 8) as day'))
+            ->where('date', 'like', date('Ymd') . "%")
+            ->groupBy('session', 'url', 'day')
+            ->get()->count();
+    }
+
+    public function getVisitsSerie() {
+        return $this->model
+            ->select(\DB::raw('SUBSTRING(date, 1, 8) as day'), \DB::raw('sum(count) as hits'))
+            ->groupBy('day')
+            ->orderBy('day')
+            ->get();
     }
 }

@@ -16,6 +16,10 @@ class Visits {
     }
 
     public function track(Request $request) {
+        if (! $this->trackable($request)) {
+            return false;
+        }
+
         $visit = new Visit();
         $visit->session = $request->getSession()->getId();
         $visit->ip = $request->getClientIp();
@@ -25,9 +29,30 @@ class Visits {
         $this->visits->update($visit);
     }
 
+    public function trackable(Request $request) {
+        if (! config('visits.enabled')) {
+            return false;
+        }
+
+        if (! $rules = config('visits.rules')) {
+            return true;
+        }
+
+        foreach ($rules as $ruleNamespace) {
+            $rule = \App::make($ruleNamespace);
+
+            if (! $rule->passes($request)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     public function getVisits($when = null) {
         if (! $when) {
-            return $this->visits->all();
+            //return $this->visits->all();
+            return $this->visits->aggregate();
         } else {
             // return period
         }
@@ -41,7 +66,7 @@ class Visits {
         return $this->visits->countUniqueVisits();
     }
 
-    public function getVisitsByUrl($url) {
-
+    public function getVisitsSerie() {
+        return $this->visits->getVisitsSerie();
     }
 }
