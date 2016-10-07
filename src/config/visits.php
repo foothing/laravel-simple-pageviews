@@ -9,4 +9,10 @@ return [
         // i.e. '/^(admin|api|auth).*/'
     ],
 
+    // Rules chain.
+    "rules" => [
+        "Foothing\Laravel\Visits\Rules\Crawler",
+        "Foothing\Laravel\Visits\Rules\UrlWhitelist",
+    ],
+
 ];
