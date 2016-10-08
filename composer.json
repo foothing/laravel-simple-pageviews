@@ -15,7 +15,8 @@
         "nesbot/carbon": "^1.21"
 	},
 	"require-dev": {
-		"mockery/mockery": "^0.9.5"
+		"mockery/mockery": "^0.9.5",
+        "orchestra/testbench": "3.1.*"
 	},
 	"autoload": {
 		"psr-4": {

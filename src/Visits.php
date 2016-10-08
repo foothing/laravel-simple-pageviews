@@ -16,6 +16,12 @@ class Visits {
         $this->visits = $visits;
     }
 
+    /**
+     * Tracks this request.
+     *
+     * @param Request $request
+     * @return bool
+     */
     public function track(Request $request) {
         if (! $this->trackable($request)) {
             return false;
@@ -30,6 +36,12 @@ class Visits {
         $this->visits->update($visit);
     }
 
+    /**
+     * Check whether this request should be tracked or not.
+     *
+     * @param Request $request
+     * @return bool
+     */
     public function trackable(Request $request) {
         if (! Config::get('visits.enabled')) {
             return false;
@@ -54,7 +66,6 @@ class Visits {
      * Wrapper to App::make() for unit tests mocking.
      *
      * @param string $ruleNamespace
-     *
      * @return RuleInterface
      */
     public function makeRule($ruleNamespace) {

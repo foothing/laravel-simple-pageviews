@@ -78,25 +78,26 @@ class VisitRepository extends EloquentRepository {
         return $this->model->sum('count');
     }
 
-    public function countVisits() {
-        return $this->filterDate($start = null, $end = null)
+    public function countVisits($start = null, $end = null) {
+        $count = $this->filterDate($start, $end)
             ->select('*', \DB::raw('SUBSTRING(date, 1, 8) as day'), \DB::raw('sum(count) as hits'))
-            ->where('date', 'like', date('Ymd') . "%")
+            //->where('date', 'like', date('Ymd') . "%")
             ->groupBy('day')
-            ->first()
-            ->hits;
+            ->first();
+
+        return $count ? $count->hits : 0;
     }
 
-    public function countUniqueVisits() {
-        return $this->filterDate($start = null, $end = null)
+    public function countUniqueVisits($start = null, $end = null) {
+        return $this->filterDate($start, $end)
             ->select(\DB::raw('SUBSTRING(date, 1, 8) as day'))
-            ->where('date', 'like', date('Ymd') . "%")
+            //->where('date', 'like', date('Ymd') . "%")
             ->groupBy('session', 'url', 'day')
             ->get()->count();
     }
 
     // @TODO sample size, i.e. when requested period is a year, sample is month
-    public function getVisitsTrend($start = null, $end = null) {
+    public function getVisitsTrend($start = 'currentWeek', $end = null) {
         return $this->filterDate($start, $end)
             ->select(\DB::raw('SUBSTRING(date, 1, 8) as day'), \DB::raw('sum(count) as hits'))
             ->groupBy('day')
