@@ -67,7 +67,7 @@ class VisitRepository extends EloquentRepository {
 
     public function aggregate($start = null, $end = null) {
         return $this->filterDate($start, $end)
-            ->select('*', \DB::raw('SUBSTRING(date, 1, 8) as day'), \DB::raw('sum(count) as hits'))
+            ->select('url', \DB::raw('SUBSTRING(date, 1, 8) as day'), \DB::raw('sum(count) as hits'))
             ->groupBy('url')
             ->orderBy('hits', 'desc')
             ->limit(50)
