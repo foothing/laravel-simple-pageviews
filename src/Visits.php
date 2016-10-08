@@ -3,6 +3,7 @@
 use Foothing\Laravel\Visits\Models\Visit;
 use Foothing\Laravel\Visits\Repositories\VisitRepository;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Config;
 
 class Visits {
 
@@ -30,16 +31,16 @@ class Visits {
     }
 
     public function trackable(Request $request) {
-        if (! config('visits.enabled')) {
+        if (! Config::get('visits.enabled')) {
             return false;
         }
 
-        if (! $rules = config('visits.rules')) {
+        if (! $rules = Config::get('visits.rules')) {
             return true;
         }
 
         foreach ($rules as $ruleNamespace) {
-            $rule = \App::make($ruleNamespace);
+            $rule = $this->makeRule($ruleNamespace);
 
             if (! $rule->passes($request)) {
                 return false;
@@ -47,5 +48,16 @@ class Visits {
         }
 
         return true;
+    }
+
+    /**
+     * Wrapper to App::make() for unit tests mocking.
+     *
+     * @param string $ruleNamespace
+     *
+     * @return RuleInterface
+     */
+    public function makeRule($ruleNamespace) {
+        return \App::make($ruleNamespace);
     }
 }

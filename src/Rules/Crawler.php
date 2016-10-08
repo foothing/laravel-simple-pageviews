@@ -17,10 +17,10 @@ class Crawler implements RuleInterface {
 
     public function passes(Request $request) {
         if ($this->detector->isCrawler($request->header('User-Agent'))) {
-            \Log::debug("Crawler blocked");
+            //\Log::debug("Crawler blocked");
             return false;
         }
-        \Log::debug("Crawler passes");
+        //\Log::debug("Crawler passes");
         return true;
     }
 }

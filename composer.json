@@ -14,9 +14,17 @@
 		"foothing/laravel-repository": "^0.8.1",
         "nesbot/carbon": "^1.21"
 	},
+	"require-dev": {
+		"mockery/mockery": "^0.9.5"
+	},
 	"autoload": {
 		"psr-4": {
 			"Foothing\\Laravel\\Visits\\": "src"
+		}
+	},
+	"autoload-dev": {
+		"psr-4": {
+			"Foothing\\Tests\\Laravel\\Visits\\": "tests"
 		}
 	}
 }
