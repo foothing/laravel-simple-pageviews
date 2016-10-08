@@ -48,25 +48,4 @@ class Visits {
 
         return true;
     }
-
-    public function getVisits($when = null) {
-        if (! $when) {
-            //return $this->visits->all();
-            return $this->visits->aggregate();
-        } else {
-            // return period
-        }
-    }
-
-    public function countVisits($when = null) {
-        return $this->visits->countVisits();
-    }
-
-    public function countUniqueVisits($when = null) {
-        return $this->visits->countUniqueVisits();
-    }
-
-    public function getVisitsSerie() {
-        return $this->visits->getVisitsSerie();
-    }
 }
