@@ -1,5 +1,6 @@
 <?php namespace Foothing\Laravel\Visits\Repositories;
 
+use Carbon\Carbon;
 use Foothing\Laravel\Visits\Models\Visit;
 use Foothing\Repository\Eloquent\EloquentRepository;
 
@@ -24,38 +25,80 @@ class VisitRepository extends EloquentRepository {
         return $this->model->updateOrCreate($unique, $values);
     }
 
-    // @TODO date filters, the method belows needs filtering
-    // and they are only placeholders yet.
+    // this method sucks and need refactor for sure.
+    public function filterDate($start = 'today', $end = null) {
 
-    public function aggregate() {
-        return $this->model
-            ->select('*', \DB::raw('SUBSTRING(date, 1, 8) as day'), \DB::raw('sum(count) as hits'))
-            ->where('date', 'like', date('Ymd') . "%")
-            ->groupBy('url', 'day')
+        if ($start instanceof Carbon && $end) {
+            return $this->model
+                ->where("date", ">=", $this->compileDate($start))
+                ->where("date", "<=", $this->compileDate($end));
+        }
+
+        elseif ($start instanceof Carbon) {
+            return $this->model->where("date", "like", $this->compileDate($start) . "%");
+        }
+
+        elseif ($start == 'today') {
+            return $this->model->where("date", "like", date('Ymd') . "%");
+        }
+
+        elseif ($start == 'currentWeek') {
+            return $this->model
+                ->where("date", ">=", $this->compileDate(Carbon::now()->modify('this week')))
+                ->where("date", "<=", $this->compileDate(Carbon::now()->modify('this week +6 days')));
+        }
+
+        elseif ($start == 'currentMonth') {
+            return $this->model->where("date", "like", date('Ym') . "%");
+        }
+
+        elseif ($start == 'currentYear') {
+            return $this->model->where("date", "like", date('Y') . "%");
+        }
+
+        else {
+            return $this->model->where("date", "like", date('Ymd') . "%");
+        }
+    }
+
+    public function compileDate(\DateTime $date) {
+        return $date->format('Ymd');
+    }
+
+    public function aggregate($start = null, $end = null) {
+        return $this->filterDate($start, $end)
+            ->select('url', \DB::raw('SUBSTRING(date, 1, 8) as day'), \DB::raw('sum(count) as hits'))
+            ->groupBy('url')
             ->orderBy('hits', 'desc')
             ->limit(50)
             ->get();
     }
 
-    public function countVisits() {
-        return $this->model
-            ->select('*', \DB::raw('SUBSTRING(date, 1, 8) as day'), \DB::raw('sum(count) as hits'))
-            ->where('date', 'like', date('Ymd') . "%")
-            ->groupBy('day')
-            ->first()
-            ->hits;
+    public function countOverallVisits() {
+        return $this->model->sum('count');
     }
 
-    public function countUniqueVisits() {
-        return $this->model
+    public function countVisits($start = null, $end = null) {
+        $count = $this->filterDate($start, $end)
+            ->select('*', \DB::raw('SUBSTRING(date, 1, 8) as day'), \DB::raw('sum(count) as hits'))
+            //->where('date', 'like', date('Ymd') . "%")
+            ->groupBy('day')
+            ->first();
+
+        return $count ? $count->hits : 0;
+    }
+
+    public function countUniqueVisits($start = null, $end = null) {
+        return $this->filterDate($start, $end)
             ->select(\DB::raw('SUBSTRING(date, 1, 8) as day'))
-            ->where('date', 'like', date('Ymd') . "%")
+            //->where('date', 'like', date('Ymd') . "%")
             ->groupBy('session', 'url', 'day')
             ->get()->count();
     }
 
-    public function getVisitsSerie() {
-        return $this->model
+    // @TODO sample size, i.e. when requested period is a year, sample is month
+    public function getVisitsTrend($start = 'currentWeek', $end = null) {
+        return $this->filterDate($start, $end)
             ->select(\DB::raw('SUBSTRING(date, 1, 8) as day'), \DB::raw('sum(count) as hits'))
             ->groupBy('day')
             ->orderBy('day')

@@ -1,11 +1,12 @@
 <?php namespace Foothing\Laravel\Visits\Rules;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Config;
 
 class UrlWhitelist implements RuleInterface {
 
     public function passes(Request $request) {
-        if (! $blacklist = config('visits.blacklist')) {
+        if (! $blacklist = Config::get('visits.blacklist')) {
             return true;
         }
 

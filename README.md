@@ -9,6 +9,7 @@ and not for in-depth traffic analysis. Features:
 - track unique page views
 - customizable whitelist rules
 - url filter and crawler filter
+- fetch data for reports
 
 Each log record keeps track of the user session, user ip and date.
 
@@ -54,6 +55,8 @@ In `config/visits.php`
 "enabled" => true,
 
 // Add patterns to be blacklisted (ignored and not tracked).
+// These patterns will apply if the UrlWhitelist rule is
+// enabled in the chain.
 "blacklist" => [
     // i.e. '/^(admin|api|auth).*/'
 ],
@@ -71,8 +74,76 @@ Default ones will filter out **crawlers** (thanks to https://github.com/JayBizzl
 and **blacklisted urls**.
 
 ## Query methods
-Read methods are still in developement. They will provide a way
-to query the tracked data for analysis, chart plotting, etc.
+```php
+$manager = app()->make("Foothing\Laravel\Visits\Reports\ReportManager");
+
+// Get visits with url, hits and day
+$manager->getVisits();
+
+[
+	{
+		"url": "foo/bar",
+		"day": "20161009"
+		"hits": 129
+	},
+	{
+		"url": "baz",
+		"day": "20161009"
+		"hits": 40
+	}
+]
+
+// Return int
+$manager->countOverallVisits();
+
+// Return int
+$manager->countVisits();
+
+// Return int
+$manager->countUniqueVisits();
+
+// Return a data collection meant for chart plotting.
+$manager->getVisitsTrend();
+
+[
+	{
+		"day": "20161008"
+		"hits": 129
+	},
+	{
+		"day": "20161009"
+		"hits": 40
+	}
+]
+```
+
+Each query method allows for date filtering and will
+accept up to 2 arguments.
+
+- first argument can be a *string preset*, or a `Carbon` date
+- second argument, if specified, must be a `Carbon` date
+
+Examples:
+```php
+
+// Triggers default filter
+$manager->getVisits();
+
+// String presets
+$manager->getVisits('today');
+$manager->getVisits('currentWeek');
+$manager->getVisits('currentMonth');
+$manager->getVisits('currentYear');
+
+// Single day
+$manager->getVisits(\Carbon::now());
+
+// Period
+$manager->getVisits(\Carbon::now(), Carbon::tomorrow());
+
+```
+
+More methods might be added later (i.e. fetch and analyze by url).
 
 ## License
 MIT

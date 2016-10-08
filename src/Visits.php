@@ -3,6 +3,7 @@
 use Foothing\Laravel\Visits\Models\Visit;
 use Foothing\Laravel\Visits\Repositories\VisitRepository;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Config;
 
 class Visits {
 
@@ -15,6 +16,12 @@ class Visits {
         $this->visits = $visits;
     }
 
+    /**
+     * Tracks this request.
+     *
+     * @param Request $request
+     * @return bool
+     */
     public function track(Request $request) {
         if (! $this->trackable($request)) {
             return false;
@@ -29,17 +36,23 @@ class Visits {
         $this->visits->update($visit);
     }
 
+    /**
+     * Check whether this request should be tracked or not.
+     *
+     * @param Request $request
+     * @return bool
+     */
     public function trackable(Request $request) {
-        if (! config('visits.enabled')) {
+        if (! Config::get('visits.enabled')) {
             return false;
         }
 
-        if (! $rules = config('visits.rules')) {
+        if (! $rules = Config::get('visits.rules')) {
             return true;
         }
 
         foreach ($rules as $ruleNamespace) {
-            $rule = \App::make($ruleNamespace);
+            $rule = $this->makeRule($ruleNamespace);
 
             if (! $rule->passes($request)) {
                 return false;
@@ -49,24 +62,13 @@ class Visits {
         return true;
     }
 
-    public function getVisits($when = null) {
-        if (! $when) {
-            //return $this->visits->all();
-            return $this->visits->aggregate();
-        } else {
-            // return period
-        }
-    }
-
-    public function countVisits($when = null) {
-        return $this->visits->countVisits();
-    }
-
-    public function countUniqueVisits($when = null) {
-        return $this->visits->countUniqueVisits();
-    }
-
-    public function getVisitsSerie() {
-        return $this->visits->getVisitsSerie();
+    /**
+     * Wrapper to App::make() for unit tests mocking.
+     *
+     * @param string $ruleNamespace
+     * @return RuleInterface
+     */
+    public function makeRule($ruleNamespace) {
+        return \App::make($ruleNamespace);
     }
 }
