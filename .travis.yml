@@ -1,0 +1,23 @@
+language: php
+
+php:
+  - 5.5
+  - hhvm
+
+install:
+  - composer install --no-interaction --prefer-source
+
+services:
+  - mysql
+
+before_install:
+  - mysql -e "create database IF NOT EXISTS pageviews;" -uroot
+  - mysql -e "CREATE USER 'pageviews'@'localhost' IDENTIFIED BY 'pageviews';" -uroot
+  - mysql -e "GRANT ALL PRIVILEGES ON pageviews.* TO 'pageviews'@'localhost';" -uroot
+  - mysql -e "FLUSH PRIVILEGES;" -uroot
+
+script:
+  - vendor/bin/phpunit --verbose --coverage-clover build/logs/clover.xml
+
+after_script:
+  - vendor/bin/test-reporter
