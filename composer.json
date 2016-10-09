@@ -16,7 +16,8 @@
 	},
 	"require-dev": {
 		"mockery/mockery": "^0.9.5",
-        "orchestra/testbench": "3.1.*"
+        "orchestra/testbench": "3.1.*",
+        "codeclimate/php-test-reporter": "^0.3.2"
 	},
 	"autoload": {
 		"psr-4": {
