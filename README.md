@@ -1,5 +1,9 @@
 # Laravel Simple Pageviews
 
+[![Code Climate](https://codeclimate.com/github/foothing/laravel-simple-pageviews/badges/gpa.svg)](https://codeclimate.com/github/foothing/laravel-simple-pageviews)
+[![Test Coverage](https://codeclimate.com/github/foothing/laravel-simple-pageviews/badges/coverage.svg)](https://codeclimate.com/github/foothing/laravel-simple-pageviews/coverage)
+[![Build Status](https://travis-ci.org/foothing/laravel-simple-pageviews.svg?branch=master)](https://travis-ci.org/foothing/laravel-simple-pageviews)
+
 Tracks page views of your Laravel 5 app for traffic monitoring.
 
 This package is meant for simple request tracking
