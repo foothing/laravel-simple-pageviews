@@ -79,21 +79,28 @@ class VisitRepository extends EloquentRepository {
     }
 
     public function countVisits($start = null, $end = null) {
-        $count = $this->filterDate($start, $end)
+        $result = $this->filterDate($start, $end)
             ->select('*', \DB::raw('SUBSTRING(date, 1, 8) as day'), \DB::raw('sum(count) as hits'))
-            //->where('date', 'like', date('Ymd') . "%")
-            ->groupBy('day')
-            ->first();
+            ->groupBy('url')
+            ->get();
 
-        return $count ? $count->hits : 0;
+        if ($result->count()) {
+            $count = 0;
+            foreach ($result as $row) {
+                $count += $row->hits;
+            }
+            return $count;
+        }
+
+        return 0;
     }
 
     public function countUniqueVisits($start = null, $end = null) {
         return $this->filterDate($start, $end)
             ->select(\DB::raw('SUBSTRING(date, 1, 8) as day'))
-            //->where('date', 'like', date('Ymd') . "%")
-            ->groupBy('session', 'url', 'day')
+            ->groupBy('session', 'url')
             ->get()->count();
+
     }
 
     // @TODO sample size, i.e. when requested period is a year, sample is month
