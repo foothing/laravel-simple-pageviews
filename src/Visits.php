@@ -1,6 +1,8 @@
 <?php namespace Foothing\Laravel\Visits;
 
 use Foothing\Laravel\Visits\Models\Visit;
+use Foothing\Laravel\Visits\Models\VisitBuffer;
+use Foothing\Laravel\Visits\Repositories\VisitBufferRepository;
 use Foothing\Laravel\Visits\Repositories\VisitRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
@@ -27,7 +29,7 @@ class Visits {
             return false;
         }
 
-        $visit = new Visit();
+        $visit = new VisitBuffer();
         $visit->session = $request->getSession()->getId();
         $visit->ip = $request->getClientIp();
         $visit->url = $request->path();
@@ -70,5 +72,12 @@ class Visits {
      */
     public function makeRule($ruleNamespace) {
         return \App::make($ruleNamespace);
+    }
+
+    /**
+     * Moves buffer data into visits database and empties the buffer.
+     */
+    public function dumpBuffer() {
+        return $this->visits->dump();
     }
 }
