@@ -77,6 +77,45 @@ Rules are meant to filter requests that you don't want to track.
 Default ones will filter out **crawlers** (thanks to https://github.com/JayBizzle/Crawler-Detect)
 and **blacklisted urls**.
 
+## The input buffer
+This package has been tested in a moderate traffic website, like ~20k pageviews / day
+which makes about 17k database records per day. The visits table will grow up pretty
+quick and the database might suffer performance issues when it comes to execute an
+`insert or update` statement on a table which count hundred thousands (or millions)
+rows.
+
+For this reason an insert/update buffer has been added. Basically, each visit is tracked
+in a temporary table that is only used on write operations, while the report and read
+operations are performed on a separate table.
+
+An `artisan` command has been added to handle the periodic data dump from the
+write table to the read table. A good practice might be dumping data each day.
+
+TL;DR configure as follows in your `app/Console/Kernel.php` (please refer to Laravel docs for scheduling info):
+```php
+/**
+ * The Artisan commands provided by your application.
+ *
+ * @var array
+ */
+protected $commands = [
+	'Foothing\Laravel\Visits\Commands\DumpVisitsBuffer',
+];
+
+/**
+ * Define the application's command schedule.
+ *
+ * @param  \Illuminate\Console\Scheduling\Schedule  $schedule
+ * @return void
+ */
+protected function schedule(Schedule $schedule)
+{
+	// Adjust this with your needs.
+	$schedule->command('visits:buffer')->dailyAt("00:00");
+}
+```
+
+
 ## Query methods
 ```php
 $manager = app()->make("Foothing\Laravel\Visits\Reports\ReportManager");
