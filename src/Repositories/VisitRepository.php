@@ -22,7 +22,9 @@ class VisitRepository extends EloquentRepository {
             'count' => \DB::raw('count+1')
         ];
 
-        return $this->model->updateOrCreate($unique, $values);
+        // Not using $this->model here, since we need
+        // to operate on the buffer table.
+        return $visit->updateOrCreate($unique, $values);
     }
 
     // this method sucks and need refactor for sure.
@@ -110,5 +112,22 @@ class VisitRepository extends EloquentRepository {
             ->groupBy('day')
             ->orderBy('day')
             ->get();
+    }
+
+    public function dump() {
+        \DB::transaction(function(){
+            $this->executeDump();
+        });
+    }
+
+    public function executeDump() {
+        // Dump records.
+        foreach (\DB::table('visits_buffer')->get() as $bufferRecord) {
+            $visit = new Visit((array)$bufferRecord);
+            $visit->save();
+        }
+
+        // Cleanup buffer.
+        \DB::table('visits_buffer')->truncate();
     }
 }
