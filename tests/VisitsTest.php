@@ -1,6 +1,6 @@
 <?php namespace Foothing\Tests\Laravel\Visits;
 
-use Foothing\Laravel\Visits\Repositories\VisitRepository;
+use Foothing\Laravel\Visits\Repositories\VisitBufferRepository;
 use Foothing\Laravel\Visits\Visits;
 use Illuminate\Http\Request;
 use Illuminate\Session\Store;
@@ -22,7 +22,7 @@ class VisitsTest extends \PHPUnit_Framework_TestCase {
 
     public function setUp() {
         parent::setUp();
-        $this->repository = \Mockery::mock(VisitRepository::class);
+        $this->repository = \Mockery::mock(VisitBufferRepository::class);
         $this->request = new Request();
         $this->visits = new Visits($this->repository);
     }

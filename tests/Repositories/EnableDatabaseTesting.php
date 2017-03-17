@@ -11,6 +11,7 @@ trait EnableDatabaseTesting {
         ]);
 
         \DB::table('visits')->truncate();
+        \DB::table('visits_buffer')->truncate();
 
         $this->init();
     }
@@ -20,9 +21,7 @@ trait EnableDatabaseTesting {
     }
 
     protected function getPackageAliases($app) {
-        return [
-            'config' => 'Illuminate\Config\Repository'
-        ];
+        return ['config' => 'Illuminate\Config\Repository'];
     }
 
     protected function getEnvironmentSetUp($app) {

@@ -1,7 +1,7 @@
 <?php namespace Foothing\Laravel\Visits;
 
 use Foothing\Laravel\Visits\Models\Visit;
-use Foothing\Laravel\Visits\Repositories\VisitRepository;
+use Foothing\Laravel\Visits\Repositories\VisitBufferRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
 
@@ -12,7 +12,7 @@ class Visits {
      */
     protected $visits;
 
-    public function __construct(VisitRepository $visits) {
+    public function __construct(VisitBufferRepository $visits) {
         $this->visits = $visits;
     }
 
@@ -70,5 +70,12 @@ class Visits {
      */
     public function makeRule($ruleNamespace) {
         return \App::make($ruleNamespace);
+    }
+
+    /**
+     * Moves buffer data into visits database and empties the buffer.
+     */
+    public function dumpBuffer() {
+        return $this->visits->dump();
     }
 }
