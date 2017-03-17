@@ -4,6 +4,7 @@ use Foothing\Laravel\Visits\Models\Visit;
 use Foothing\Laravel\Visits\Models\VisitBuffer;
 use Foothing\Laravel\Visits\Repositories\VisitBufferRepository;
 use Foothing\Laravel\Visits\Repositories\VisitRepository;
+use Illuminate\Support\Facades\DB;
 
 class VisitRepositoryTest extends \Orchestra\Testbench\TestCase {
 
@@ -15,7 +16,62 @@ class VisitRepositoryTest extends \Orchestra\Testbench\TestCase {
     protected $repository;
 
     protected function init() {
+        // Important note.
+        // All tests here are working directly on
+        // the Visit model since the update logic
+        // is the same, and the buffer table is
+        // an identical copy of the visits table.
+        // All tests work regardless of the buffer.
         $this->repository = new VisitRepository(new Visit());
+    }
+
+    //
+    //
+    //  Insert / update tests.
+    //
+    //
+
+    public function test_update_insert_record() {
+        $visit = $this->data();
+        $this->repository->update($visit);
+        $persisted = $this->repository->findOneBy('ip', 'ip');
+
+        $this->assertNotNull($persisted);
+        $this->assertEquals('sessionId', $persisted->session);
+        $this->assertEquals('ip', $persisted->ip);
+        $this->assertEquals('foo/bar', $persisted->url);
+        $this->assertEquals(date('YmdH'), $persisted->date);
+        $this->assertEquals(1, $persisted->count);
+    }
+
+    public function test_update_ignores_model_count() {
+        $visit = $this->data();
+        $visit->count = 100;
+        $this->repository->update($visit);
+        $persisted = $this->repository->findOneBy('ip', 'ip');
+
+        $this->assertEquals(1, $persisted->count);
+    }
+
+    public function test_update_actually_updates_on_duplicate() {
+        $visit = $this->data();
+        $this->repository->update($visit);
+        $this->repository->update($visit);
+
+        $this->assertEquals(1, $this->repository->all()->count());
+        $this->assertEquals(2, $this->repository->find(1)->count);
+    }
+
+    /**
+     * @dataProvider insertDataSet
+     */
+    public function test_update_insert_on_key_attributes_change($visit, $changed) {
+        $this->repository->update($visit);
+        $this->repository->update($changed);
+
+        $this->assertEquals(2, $this->repository->all()->count());
+        $this->assertEquals(1, $this->repository->find(1)->count);
+        $this->assertEquals(1, $this->repository->find(2)->count);
     }
 
     //
@@ -58,6 +114,52 @@ class VisitRepositoryTest extends \Orchestra\Testbench\TestCase {
         $this->assertEquals(date('Ymd'), $this->repository->getVisitsTrend('today')[0]->day);
     }
 
+    public function test_dump_uses_transaction() {
+        DB::shouldReceive('transaction')->once();
+        $this->repository->dump();
+    }
+
+    /**
+     * @dataProvider dumpData
+     */
+    public function test_execute_dump($visitBufferArray) {
+        // We build a scenario inserting models regardless of
+        // the update business logic, as we only need the
+        // records to be in the buffer for this test purpose.
+
+        foreach ($visitBufferArray as $visitBuffer) {
+            $visitBuffer->save();
+        }
+
+        // Execute the dump.
+        $this->repository->executeDump();
+
+        // Assert records has been moved.
+        $this->assertEquals(0, VisitBuffer::all()->count());
+        $this->assertEquals(count($visitBufferArray), $this->repository->all()->count());
+    }
+
+    // @TODO test date filters
+
+    public function insertDataSet() {
+        $original = $this->data();
+        return [
+            [$original, $original->replicate()->fill(['session' => 'changed'])],
+            [$original, $original->replicate()->fill(['ip' => 'changed'])],
+            [$original, $original->replicate()->fill(['url' => 'changed'])],
+            [$original, $original->replicate()->fill(['date' => 'changed'])],
+        ];
+    }
+
+    public function dumpData() {
+        $data = ['session' => 'sessionId', 'ip' => 'ip', 'url' => 'foo/bar', 'date' => date('YmdH')];
+        return [
+            [[]],
+            [[new VisitBuffer($data)]],
+            [[new VisitBuffer($data), new VisitBuffer($data)]],
+        ];
+    }
+
     protected function data() {
         return new Visit([
             'session' => 'sessionId',
@@ -82,6 +184,7 @@ class VisitRepositoryTest extends \Orchestra\Testbench\TestCase {
         $visit5 = $visit1->replicate()->fill(['url' => 'another/date', 'date' => '2016010100']);
 
         $this->repository->update($visit1);
+        $this->repository->update($visit2);
         $this->repository->update($visit2);
         $this->repository->update($visit3);
         $this->repository->update($visit4);

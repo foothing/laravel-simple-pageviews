@@ -1,6 +1,7 @@
 <?php namespace Foothing\Tests\Laravel\Visits;
 
 use Foothing\Laravel\Visits\Repositories\VisitBufferRepository;
+use Foothing\Laravel\Visits\Repositories\VisitRepository;
 use Foothing\Laravel\Visits\Visits;
 use Illuminate\Http\Request;
 use Illuminate\Session\Store;
@@ -22,7 +23,7 @@ class VisitsTest extends \PHPUnit_Framework_TestCase {
 
     public function setUp() {
         parent::setUp();
-        $this->repository = \Mockery::mock(VisitBufferRepository::class);
+        $this->repository = \Mockery::mock(VisitRepository::class);
         $this->request = new Request();
         $this->visits = new Visits($this->repository);
     }
@@ -86,6 +87,11 @@ class VisitsTest extends \PHPUnit_Framework_TestCase {
 
         $rule->shouldReceive('passes')->once()->andReturn(false);
         $this->assertFalse($visits->trackable($this->request));
+    }
+
+    public function test_dump_buffer() {
+        $this->repository->shouldReceive('dump')->once();
+        $this->visits->dumpBuffer();
     }
 
     public function tearDown() {

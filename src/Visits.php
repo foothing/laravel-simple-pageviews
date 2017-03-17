@@ -1,7 +1,9 @@
 <?php namespace Foothing\Laravel\Visits;
 
 use Foothing\Laravel\Visits\Models\Visit;
+use Foothing\Laravel\Visits\Models\VisitBuffer;
 use Foothing\Laravel\Visits\Repositories\VisitBufferRepository;
+use Foothing\Laravel\Visits\Repositories\VisitRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
 
@@ -12,7 +14,7 @@ class Visits {
      */
     protected $visits;
 
-    public function __construct(VisitBufferRepository $visits) {
+    public function __construct(VisitRepository $visits) {
         $this->visits = $visits;
     }
 
@@ -27,7 +29,7 @@ class Visits {
             return false;
         }
 
-        $visit = new Visit();
+        $visit = new VisitBuffer();
         $visit->session = $request->getSession()->getId();
         $visit->ip = $request->getClientIp();
         $visit->url = $request->path();
