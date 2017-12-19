@@ -1,6 +1,5 @@
 <?php namespace Foothing\Laravel\Visits\Rules;
 
-
 use Illuminate\Http\Request;
 use Jaybizzle\CrawlerDetect\CrawlerDetect;
 
