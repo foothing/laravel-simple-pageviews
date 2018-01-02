@@ -18,8 +18,10 @@ class CreateBufferTable extends Migration {
 			$table->string('session');
 			$table->string('ip', 15);
 			$table->string('url');
-			$table->string('date', 10);
+			$table->date('date');
 			$table->integer('count')->unsigned();
+
+            $table->index(['session', 'ip', 'url', 'date']);
 		});
 	}
 

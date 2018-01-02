@@ -1,5 +1,6 @@
 <?php namespace Foothing\Tests\Laravel\Visits\Repositories;
 
+use Carbon\Carbon;
 use Foothing\Laravel\Visits\Models\Visit;
 use Foothing\Laravel\Visits\Models\VisitBuffer;
 use Foothing\Laravel\Visits\Repositories\VisitBufferRepository;
@@ -40,7 +41,7 @@ class VisitRepositoryTest extends \Orchestra\Testbench\TestCase {
         $this->assertEquals('sessionId', $persisted->session);
         $this->assertEquals('ip', $persisted->ip);
         $this->assertEquals('foo/bar', $persisted->url);
-        $this->assertEquals(date('YmdH'), $persisted->date);
+        $this->assertEquals(Carbon::now()->format('Y-m-d'), $persisted->date);
         $this->assertEquals(1, $persisted->count);
     }
 
@@ -82,7 +83,7 @@ class VisitRepositoryTest extends \Orchestra\Testbench\TestCase {
 
     public function test_aggregate_query() {
         $this->buildScenario();
-        $aggregate = $this->repository->aggregate();
+        $aggregate = $this->repository->aggregate(Carbon::now());
         $this->assertEquals(3, $aggregate->count());
         $this->assertEquals('foo/bar', $aggregate[0]->url);
         $this->assertEquals(2, $aggregate[0]->hits);
@@ -94,24 +95,19 @@ class VisitRepositoryTest extends \Orchestra\Testbench\TestCase {
 
     public function test_count_overall() {
         $this->buildScenario();
-        $this->assertEquals(6, $this->repository->countOverallVisits());
-    }
-
-    public function test_count_visits() {
-        $this->buildScenario();
-        $this->assertEquals(5, $this->repository->countVisits());
+        $this->assertEquals(5, $this->repository->countOverallVisits(Carbon::now()));
     }
 
     public function test_count_unique_visits() {
         $this->buildScenario();
-        $this->assertEquals(4, $this->repository->countUniqueVisits());
+        $this->assertEquals(4, $this->repository->countUniqueVisits(Carbon::now()));
     }
 
-    public function test_visit_trend() {
+    public function test_visit_trend_daily() {
         $this->buildScenario();
-        $this->assertEquals(1, $this->repository->getVisitsTrend('today')->count());
-        $this->assertEquals(5, $this->repository->getVisitsTrend('today')[0]->hits);
-        $this->assertEquals(date('Ymd'), $this->repository->getVisitsTrend('today')[0]->day);
+        $this->assertEquals(1, $this->repository->getVisitsTrendDaily(Carbon::now())->count());
+        $this->assertEquals(5, $this->repository->getVisitsTrendDaily(Carbon::now())[0]->hits);
+        $this->assertEquals(date('Y-m-d'), $this->repository->getVisitsTrendDaily(Carbon::now())[0]->date);
     }
 
     public function test_dump_uses_transaction() {
@@ -165,7 +161,7 @@ class VisitRepositoryTest extends \Orchestra\Testbench\TestCase {
             'session' => 'sessionId',
             'ip' => 'ip',
             'url' => 'foo/bar',
-            'date' => date('YmdH')
+            'date' => date('Y-m-d')
         ]);
     }
 
@@ -181,7 +177,7 @@ class VisitRepositoryTest extends \Orchestra\Testbench\TestCase {
         $visit2 = $visit1->replicate()->fill(['url' => 'foo/bar/baz']);
         $visit3 = $visit1->replicate()->fill(['url' => 'foo/bar', 'session' => 'userB']);
         $visit4 = $visit1->replicate()->fill(['url' => 'baz', 'session' => 'userC']);
-        $visit5 = $visit1->replicate()->fill(['url' => 'another/date', 'date' => '2016010100']);
+        $visit5 = $visit1->replicate()->fill(['url' => 'another/date', 'date' => Carbon::createFromDate(2017, 1, 1)->format('Y-m-d')]);
 
         $this->repository->update($visit1);
         $this->repository->update($visit2);

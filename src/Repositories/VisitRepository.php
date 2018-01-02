@@ -27,90 +27,93 @@ class VisitRepository extends EloquentRepository {
         return $visit->updateOrCreate($unique, $values);
     }
 
-    // this method sucks and need refactor for sure.
-    public function filterDate($start = 'today', $end = null) {
-
-        if ($start instanceof Carbon && $end) {
-            return $this->model
-                ->where("date", ">=", $this->compileDate($start))
-                ->where("date", "<=", $this->compileDate($end));
+    /**
+     * Applies where clause on date column.
+     *
+     * @param Carbon $start
+     * @param Carbon $end
+     *
+     * @return mixed
+     */
+    public function where(Carbon $start, Carbon $end = null, $url = null) {
+        if ($end) {
+            $query = $this->model->whereBetween("date", [$start->format('Y-m-d'), $end->format('Y-m-d')]);
+        } else {
+            $query = $this->model->where("date", $start->format('Y-m-d'));
         }
 
-        elseif ($start instanceof Carbon) {
-            return $this->model->where("date", "like", $this->compileDate($start) . "%");
+        if ($url) {
+            $query = $query->whereUrl($url);
         }
 
-        elseif ($start == 'today') {
-            return $this->model->where("date", "like", date('Ymd') . "%");
-        }
-
-        elseif ($start == 'currentWeek') {
-            return $this->model
-                ->where("date", ">=", $this->compileDate(Carbon::now()->modify('this week')))
-                ->where("date", "<=", $this->compileDate(Carbon::now()->modify('this week +6 days')));
-        }
-
-        elseif ($start == 'currentMonth') {
-            return $this->model->where("date", "like", date('Ym') . "%");
-        }
-
-        elseif ($start == 'currentYear') {
-            return $this->model->where("date", "like", date('Y') . "%");
-        }
-
-        else {
-            return $this->model->where("date", "like", date('Ymd') . "%");
-        }
+        return $query;
     }
 
-    public function compileDate(\DateTime $date) {
-        return $date->format('Ymd');
-    }
-
-    public function aggregate($start = null, $end = null) {
-        return $this->filterDate($start, $end)
-            ->select('url', \DB::raw('SUBSTRING(date, 1, 8) as day'), \DB::raw('sum(count) as hits'))
+    /**
+     * Return the list of urls with best performance, ordered by hits.
+     *
+     * @param Carbon $start
+     * @param Carbon|null $end
+     * @param int  $limit
+     *
+     * @return mixed
+     */
+    public function aggregate(Carbon $start, Carbon $end = null, $limit = 50) {
+        return $this->where($start, $end)
+            ->select('url', \DB::raw('sum(count) as hits'))
             ->groupBy('url')
             ->orderBy('hits', 'desc')
-            ->limit(50)
+            ->limit($limit)
             ->get();
     }
 
-    public function countOverallVisits() {
-        return $this->model->sum('count');
+    /**
+     * Sum hits in the given period.
+     *
+     * @param Carbon $start
+     * @param Carbon|null $end
+     * @param string $url
+     *
+     * @return mixed
+     */
+    public function countOverallVisits(Carbon $start, Carbon $end = null, $url = null) {
+        return $this->where($start, $end, $url)->sum('count');
     }
 
-    public function countVisits($start = null, $end = null) {
-        $result = $this->filterDate($start, $end)
-            ->select('*', \DB::raw('SUBSTRING(date, 1, 8) as day'), \DB::raw('sum(count) as hits'))
-            ->groupBy('url')
+    /**
+     * Count records in the given period.
+     *
+     * @param Carbon $start
+     * @param Carbon|null $end
+     * @param string $url
+     *
+     * @return mixed
+     */
+    public function countUniqueVisits(Carbon $start, Carbon $end = null, $url = null) {
+        return $this->where($start, $end, $url)->count('count');
+    }
+
+    /**
+     * Return an array of date/hits in the given period.
+     *
+     * @param Carbon $start
+     * @param Carbon|null   $end
+     * @param string $url
+     *
+     * @return mixed
+     */
+    public function getVisitsTrendDaily(Carbon $start, Carbon $end = null, $url = null) {
+        return $this->where($start, $end, $url)
+            ->select('date', \DB::raw('sum(count) as hits'))
+            ->groupBy('date')
+            ->orderBy('date')
             ->get();
-
-        if ($result->count()) {
-            $count = 0;
-            foreach ($result as $row) {
-                $count += $row->hits;
-            }
-            return $count;
-        }
-
-        return 0;
     }
 
-    public function countUniqueVisits($start = null, $end = null) {
-        return $this->filterDate($start, $end)
-            ->select(\DB::raw('SUBSTRING(date, 1, 8) as day'))
-            ->groupBy('session', 'url')
-            ->get()->count();
-
-    }
-
-    // @TODO sample size, i.e. when requested period is a year, sample is month
-    public function getVisitsTrend($start = 'currentWeek', $end = null) {
-        return $this->filterDate($start, $end)
-            ->select(\DB::raw('SUBSTRING(date, 1, 8) as day'), \DB::raw('sum(count) as hits'))
-            ->groupBy('day')
-            ->orderBy('day')
+    public function getVisitsTrendMonthly(Carbon $start, Carbon $end = null, $url = null) {
+        return $this->where($start, $end, $url)
+            ->select(\DB::raw('month(date) as month'), \DB::raw('sum(count) as hits'))
+            ->groupBy(\DB::raw('month(date)'))
             ->get();
     }
 
