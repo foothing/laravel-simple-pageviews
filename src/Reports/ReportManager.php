@@ -77,7 +77,7 @@ class ReportManager {
     }
 
     /**
-     * Return visits trend for the given period.
+     * Return daily visits trend for the given period.
      *
      * @param string|DateTime $periodStart
      * @param DateTime $periodEnd
@@ -85,9 +85,24 @@ class ReportManager {
      *
      * @return mixed
      */
-    public function getVisitsTrend($periodStart = null, $periodEnd = null, $url = null) {
+    public function getVisitsTrendDaily($periodStart = null, $periodEnd = null, $url = null) {
         $args = $this->parser->parse($periodStart, $periodEnd);
         $args[] = $url;
-        return $this->call('getVisitsTrend', $args);
+        return $this->call('getVisitsTrendDaily', $args);
+    }
+
+    /**
+     * Return monthly visits trend for the given period.
+     *
+     * @param string|DateTime $periodStart
+     * @param DateTime $periodEnd
+     * @param string $url
+     *
+     * @return mixed
+     */
+    public function getVisitsTrendMonthly($periodStart = null, $periodEnd = null, $url = null) {
+        $args = $this->parser->parse($periodStart, $periodEnd);
+        $args[] = $url;
+        return $this->call('getVisitsTrendMonthly', $args);
     }
 }

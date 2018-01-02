@@ -95,7 +95,6 @@ class VisitRepository extends EloquentRepository {
 
     /**
      * Return an array of date/hits in the given period.
-     * @TODO sample size, i.e. when requested period is a year, sample is month
      *
      * @param Carbon $start
      * @param Carbon|null   $end
@@ -103,11 +102,18 @@ class VisitRepository extends EloquentRepository {
      *
      * @return mixed
      */
-    public function getVisitsTrend(Carbon $start, Carbon $end = null, $url = null) {
+    public function getVisitsTrendDaily(Carbon $start, Carbon $end = null, $url = null) {
         return $this->where($start, $end, $url)
             ->select('date', \DB::raw('sum(count) as hits'))
             ->groupBy('date')
             ->orderBy('date')
+            ->get();
+    }
+
+    public function getVisitsTrendMonthly(Carbon $start, Carbon $end = null, $url = null) {
+        return $this->where($start, $end, $url)
+            ->select(\DB::raw('month(date) as month'), \DB::raw('sum(count) as hits'))
+            ->groupBy(\DB::raw('month(date)'))
             ->get();
     }
 
