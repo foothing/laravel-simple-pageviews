@@ -27,71 +27,32 @@ class VisitRepository extends EloquentRepository {
         return $visit->updateOrCreate($unique, $values);
     }
 
-    // this method sucks and need refactor for sure.
-    public function filterDate($start = 'today', $end = null) {
-        // Prevent full-table scan.
-        if (! $start) {
-            $start = 'currentYear';
-        }
-
-        if (! $end instanceof Carbon) {
-            $end = new Carbon($end);
-        }
-
-        if ($start instanceof Carbon && $end) {
+    /**
+     * Applies where clause on date column.
+     *
+     * @param Carbon $start
+     * @param Carbon $end
+     *
+     * @return mixed
+     */
+    public function filterDate(Carbon $start, Carbon $end = null) {
+        if ($end) {
             return $this->model->whereBetween("date", [$start, $end]);
         }
 
-        elseif ($start instanceof Carbon) {
-            return $this->model->where("date", $start);
-        }
-
-        elseif ($start == 'currentWeek') {
-            $start = Carbon::now()->startOfWeek();
-            $end = Carbon::now()->endOfWeek();
-
-            return $this->model->whereBetween("date", [$start, $end]);
-        }
-
-        elseif ($start == 'currentMonth') {
-            // Use date boundaries instead of
-            // SQL month() function, to avoid
-            // full table scan.
-            $start = Carbon::now()->startOfMonth();
-            $end = Carbon::now()->endOfMonth();
-
-            return $this->model->whereBetween('date', [$start, $end]);
-        }
-
-        elseif ($start == 'currentYear') {
-            // Use date boundaries instead of
-            // SQL month() function, to avoid
-            // full table scan.
-            $start = Carbon::now()->startOfYear();
-            $end = Carbon::now()->endOfYear();
-
-            return $this->model->whereBetween('date', [$start, $end]);
-        }
-
-        elseif ($start) {
-            // Try the Carbon parser for strings like
-            // today, tomorrow, yesterday, etc.
-            return $this->model->where("date", new Carbon($start));
-        }
-
-        return $this->model;
+        return $this->model->where("date", $start);
     }
 
     /**
      * Return the list of urls with best performance, ordered by hits.
      *
-     * @param null $start
-     * @param null $end
+     * @param Carbon|null $start
+     * @param Carbon|null $end
      * @param int  $limit
      *
      * @return mixed
      */
-    public function aggregate($start = null, $end = null, $limit = 50) {
+    public function aggregate(Carbon $start = null, Carbon $end = null, $limit = 50) {
         return $this->filterDate($start, $end)
             ->select('url', \DB::raw('sum(count) as hits'))
             ->groupBy('url')
@@ -103,24 +64,24 @@ class VisitRepository extends EloquentRepository {
     /**
      * Sum hits in the given period.
      *
-     * @param null $start
-     * @param null $end
+     * @param Carbon|null $start
+     * @param Carbon|null $end
      *
      * @return mixed
      */
-    public function countOverallVisits($start = null, $end = null) {
+    public function countOverallVisits(Carbon $start = null, Carbon $end = null) {
         return $this->filterDate($start, $end)->sum('count');
     }
 
     /**
      * Count records in the given period.
      *
-     * @param null $start
-     * @param null $end
+     * @param Carbon|null $start
+     * @param Carbon|null $end
      *
      * @return mixed
      */
-    public function countUniqueVisits($start = null, $end = null) {
+    public function countUniqueVisits(Carbon $start = null, Carbon $end = null) {
         return $this->filterDate($start, $end)->count('count');
     }
 
@@ -128,12 +89,12 @@ class VisitRepository extends EloquentRepository {
      * Return an array of date/hits in the given period.
      * @TODO sample size, i.e. when requested period is a year, sample is month
      *
-     * @param string $start
-     * @param null   $end
+     * @param Carbon|null $start
+     * @param Carbon|null   $end
      *
      * @return mixed
      */
-    public function getVisitsTrend($start = 'currentWeek', $end = null) {
+    public function getVisitsTrend(Carbon $start = null, Carbon $end = null) {
         return $this->filterDate($start, $end)
             ->select('date', \DB::raw('sum(count) as hits'))
             ->groupBy('date')
