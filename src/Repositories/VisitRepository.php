@@ -35,25 +35,31 @@ class VisitRepository extends EloquentRepository {
      *
      * @return mixed
      */
-    public function filterDate(Carbon $start, Carbon $end = null) {
+    public function where(Carbon $start, Carbon $end = null, $url = null) {
         if ($end) {
-            return $this->model->whereBetween("date", [$start, $end]);
+            $query = $this->model->whereBetween("date", [$start, $end]);
+        } else {
+            $query = $this->model->where("date", $start);
         }
 
-        return $this->model->where("date", $start);
+        if ($url) {
+            $query = $query->whereUrl($url);
+        }
+
+        return $query;
     }
 
     /**
      * Return the list of urls with best performance, ordered by hits.
      *
-     * @param Carbon|null $start
+     * @param Carbon $start
      * @param Carbon|null $end
      * @param int  $limit
      *
      * @return mixed
      */
-    public function aggregate(Carbon $start = null, Carbon $end = null, $limit = 50) {
-        return $this->filterDate($start, $end)
+    public function aggregate(Carbon $start, Carbon $end = null, $limit = 50) {
+        return $this->where($start, $end)
             ->select('url', \DB::raw('sum(count) as hits'))
             ->groupBy('url')
             ->orderBy('hits', 'desc')
@@ -64,38 +70,41 @@ class VisitRepository extends EloquentRepository {
     /**
      * Sum hits in the given period.
      *
-     * @param Carbon|null $start
+     * @param Carbon $start
      * @param Carbon|null $end
+     * @param string $url
      *
      * @return mixed
      */
-    public function countOverallVisits(Carbon $start = null, Carbon $end = null) {
-        return $this->filterDate($start, $end)->sum('count');
+    public function countOverallVisits(Carbon $start, Carbon $end = null, $url = null) {
+        return $this->where($start, $end, $url)->sum('count');
     }
 
     /**
      * Count records in the given period.
      *
-     * @param Carbon|null $start
+     * @param Carbon $start
      * @param Carbon|null $end
+     * @param string $url
      *
      * @return mixed
      */
-    public function countUniqueVisits(Carbon $start = null, Carbon $end = null) {
-        return $this->filterDate($start, $end)->count('count');
+    public function countUniqueVisits(Carbon $start, Carbon $end = null, $url = null) {
+        return $this->where($start, $end, $url)->count('count');
     }
 
     /**
      * Return an array of date/hits in the given period.
      * @TODO sample size, i.e. when requested period is a year, sample is month
      *
-     * @param Carbon|null $start
+     * @param Carbon $start
      * @param Carbon|null   $end
+     * @param string $url
      *
      * @return mixed
      */
-    public function getVisitsTrend(Carbon $start = null, Carbon $end = null) {
-        return $this->filterDate($start, $end)
+    public function getVisitsTrend(Carbon $start, Carbon $end = null, $url = null) {
+        return $this->where($start, $end, $url)
             ->select('date', \DB::raw('sum(count) as hits'))
             ->groupBy('date')
             ->orderBy('date')

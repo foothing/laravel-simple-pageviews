@@ -39,6 +39,7 @@ class Parser {
 
         return [
             new Carbon($startOrShortcut),
+            null
         ];
     }
 

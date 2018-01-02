@@ -1,6 +1,5 @@
 <?php namespace Foothing\Laravel\Visits\Reports;
 
-use Carbon\Carbon;
 use Foothing\Laravel\Visits\Parser;
 use Foothing\Laravel\Visits\Repositories\VisitRepository;
 
@@ -38,11 +37,13 @@ class ReportManager {
      *
      * @param null $periodStart
      * @param null $periodEnd
+     * @param int $limit
      *
      * @return mixed
      */
-    public function getVisits($periodStart = null, $periodEnd = null) {
+    public function getVisits($periodStart = null, $periodEnd = null, $limit = 50) {
         $args = $this->parser->parse($periodStart, $periodEnd);
+        $args[] = $limit;
         return $this->call('aggregate', $args);
     }
 
@@ -51,10 +52,12 @@ class ReportManager {
      *
      * @param $periodStart
      * @param $periodEnd
+     * @param string $url
      * @return int
      */
-    public function countOverallVisits($periodStart = null, $periodEnd = null) {
+    public function countOverallVisits($periodStart = null, $periodEnd = null, $url = null) {
         $args = $this->parser->parse($periodStart, $periodEnd);
+        $args[] = $url;
         return $this->call('countOverallVisits', $args);
     }
 
@@ -63,11 +66,13 @@ class ReportManager {
      *
      * @param string|DateTime $periodStart
      * @param DateTime $periodEnd
+     * @param string $url
      *
      * @return int
      */
-    public function countUniqueVisits($periodStart = null, $periodEnd = null) {
+    public function countUniqueVisits($periodStart = null, $periodEnd = null, $url = null) {
         $args = $this->parser->parse($periodStart, $periodEnd);
+        $args[] = $url;
         return $this->call('countUniqueVisits', $args);
     }
 
@@ -76,11 +81,13 @@ class ReportManager {
      *
      * @param string|DateTime $periodStart
      * @param DateTime $periodEnd
+     * @param string $url
      *
      * @return mixed
      */
-    public function getVisitsTrend($periodStart = null, $periodEnd = null) {
+    public function getVisitsTrend($periodStart = null, $periodEnd = null, $url = null) {
         $args = $this->parser->parse($periodStart, $periodEnd);
+        $args[] = $url;
         return $this->call('getVisitsTrend', $args);
     }
 }
