@@ -33,7 +33,7 @@ class Visits {
         $visit->session = $request->getSession()->getId();
         $visit->ip = $request->getClientIp();
         $visit->url = $request->path();
-        $visit->date = date('YmdH');
+        $visit->date = date('Y-m-d');
 
         $this->visits->update($visit);
     }
