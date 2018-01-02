@@ -37,9 +37,9 @@ class VisitRepository extends EloquentRepository {
      */
     public function where(Carbon $start, Carbon $end = null, $url = null) {
         if ($end) {
-            $query = $this->model->whereBetween("date", [$start, $end]);
+            $query = $this->model->whereBetween("date", [$start->format('Y-m-d'), $end->format('Y-m-d')]);
         } else {
-            $query = $this->model->where("date", $start);
+            $query = $this->model->where("date", $start->format('Y-m-d'));
         }
 
         if ($url) {
