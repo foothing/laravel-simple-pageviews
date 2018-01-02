@@ -28,22 +28,12 @@ class ReportManager {
     /**
      * Return total page hits.
      *
+     * @param $periodStart
+     * @param $periodEnd
      * @return int
      */
-    public function countOverallVisits() {
-        return $this->visits->countOverallVisits();
-    }
-
-    /**
-     * Return visits in the given period.
-     *
-     * @param string|DateTime $periodStart
-     * @param DateTime $periodEnd
-     *
-     * @return int
-     */
-    public function countVisits($periodStart = null, $periodEnd = null) {
-        return $this->visits->countVisits($periodStart, $periodEnd);
+    public function countOverallVisits($periodStart = null, $periodEnd = null) {
+        return $this->visits->countOverallVisits($periodStart, $periodEnd);
     }
 
     /**
