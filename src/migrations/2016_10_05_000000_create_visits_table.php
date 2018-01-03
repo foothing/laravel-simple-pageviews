@@ -24,6 +24,7 @@ class CreateVisitsTable extends Migration {
             $table->index('date');
             $table->index('session');
             $table->index('url');
+            $table->index(['date', 'url']);
 		});
 	}
 
