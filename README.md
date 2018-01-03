@@ -8,6 +8,8 @@ Tracks page views of your Laravel 5.x app for traffic monitoring.
 
 To date, it has been tested with Laravel up to 5.5 and PHP 7.
 
+> **IMPORTANT** If you are upgrading from previous 0.x version please [read the release notes](https://github.com/foothing/laravel-simple-pageviews/releases/tag/1.0.0).
+
 This package is meant for simple request tracking
 and not for in-depth traffic analysis. Features:
 
