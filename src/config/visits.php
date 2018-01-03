@@ -17,4 +17,6 @@ return [
         "Foothing\Laravel\Visits\Rules\UrlWhitelist",
     ],
 
+    "cache" => true,
+
 ];

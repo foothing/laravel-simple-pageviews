@@ -32,6 +32,7 @@ class VisitRepository extends EloquentRepository {
      *
      * @param Carbon $start
      * @param Carbon $end
+     * @param string $url
      *
      * @return mixed
      */
@@ -111,6 +112,8 @@ class VisitRepository extends EloquentRepository {
     }
 
     public function getVisitsTrendMonthly(Carbon $start, Carbon $end = null, $url = null) {
+        // @TODO probably month() function breaking performances.
+
         return $this->where($start, $end, $url)
             ->select(\DB::raw('month(date) as month'), \DB::raw('sum(count) as hits'))
             ->groupBy(\DB::raw('month(date)'))
