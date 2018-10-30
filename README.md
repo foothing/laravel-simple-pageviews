@@ -33,9 +33,9 @@ Add the service provider in `config/app.php`:
 
 Publish migration and configuration files:
 
-`php artisan vendor:publish provider="Foothing\Laravel\Visits\ServiceProvider --tag="config"`
+`php artisan vendor:publish --provider="Foothing\Laravel\Visits\ServiceProvider" --tag="config"`
 
-`php artisan vendor:publish provider="Foothing\Laravel\Visits\ServiceProvider --tag="migrations"`
+`php artisan vendor:publish --provider="Foothing\Laravel\Visits\ServiceProvider" --tag="migrations"`
 
 Run the migration:
 
